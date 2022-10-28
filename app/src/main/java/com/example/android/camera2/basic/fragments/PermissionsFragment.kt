@@ -17,10 +17,18 @@
 package com.example.android.camera2.basic.fragments
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.graphics.ImageFormat
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraMetadata
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
@@ -62,14 +70,31 @@ class PermissionsFragment : Fragment() {
 
     private fun nativateToCamera()
     {
-        lifecycleScope.launchWhenStarted {
-            Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(
-                    PermissionsFragmentDirections.actionPermissionsToSelector())
+        val cameraManager =
+            requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
+
+        val cameraIds = cameraManager.cameraIdList
+
+        if (cameraIds.isEmpty()) {
+            val alertBuilder = AlertDialog.Builder(requireActivity())
+            alertBuilder.setTitle(R.string.no_camera_title)
+                .setMessage(R.string.no_camera_message)
+                .setPositiveButton(android.R.string.ok,
+                    DialogInterface.OnClickListener { _, _ -> requireActivity().finish() })
+                .create().show()
+        } else {
+            lifecycleScope.launchWhenStarted {
+                Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(
+                    PermissionsFragmentDirections.actionPermissionsToCamera(
+                        cameraIds[0],
+                        ImageFormat.JPEG
+                    )
+                )
+            }
         }
     }
 
     companion object {
-
         /** Convenience method used to check if all permissions required by this app are granted */
         fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED

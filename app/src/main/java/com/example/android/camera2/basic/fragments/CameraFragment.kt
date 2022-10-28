@@ -278,7 +278,7 @@ class CameraFragment : Fragment() {
                     .setMessage(R.string.no_camera_message)
                     .setPositiveButton(android.R.string.ok,
                     DialogInterface.OnClickListener { _, _ -> requireActivity().finish() })
-                    .create().show()
+                alertBuilder.create().show()
             }
 
             override fun onError(device: CameraDevice, error: Int) {
