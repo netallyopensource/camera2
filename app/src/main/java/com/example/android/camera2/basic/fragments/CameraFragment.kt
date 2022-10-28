@@ -18,6 +18,7 @@ package com.example.android.camera2.basic.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCaptureSession
@@ -40,6 +41,7 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.drawable.toDrawable
 import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
@@ -271,7 +273,12 @@ class CameraFragment : Fragment() {
 
             override fun onDisconnected(device: CameraDevice) {
                 Log.w(TAG, "Camera $cameraId has been disconnected")
-                requireActivity().finish()
+                val alertBuilder = AlertDialog.Builder(requireActivity())
+                alertBuilder.setTitle(R.string.no_camera_title)
+                    .setMessage(R.string.no_camera_message)
+                    .setPositiveButton(android.R.string.ok,
+                    DialogInterface.OnClickListener { _, _ -> requireActivity().finish() })
+                    .create().show()
             }
 
             override fun onError(device: CameraDevice, error: Int) {
