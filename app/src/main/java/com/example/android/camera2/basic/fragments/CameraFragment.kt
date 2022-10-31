@@ -21,26 +21,12 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.ImageFormat
-import android.hardware.camera2.CameraCaptureSession
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraDevice
-import android.hardware.camera2.CameraManager
-import android.hardware.camera2.CaptureRequest
-import android.hardware.camera2.CaptureResult
-import android.hardware.camera2.DngCreator
-import android.hardware.camera2.TotalCaptureResult
+import android.hardware.camera2.*
 import android.media.Image
 import android.media.ImageReader
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
+import android.os.*
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.Surface
-import android.view.SurfaceHolder
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.drawable.toDrawable
 import androidx.exifinterface.media.ExifInterface
@@ -50,9 +36,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import com.example.android.camera.utils.OrientationLiveData
 import com.example.android.camera.utils.computeExifOrientation
 import com.example.android.camera.utils.getPreviewOutputSize
-import com.example.android.camera.utils.OrientationLiveData
 import com.example.android.camera2.basic.CameraActivity
 import com.example.android.camera2.basic.R
 import com.example.android.camera2.basic.databinding.FragmentCameraBinding
@@ -64,11 +50,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeoutException
-import java.util.Date
-import java.util.Locale
-import kotlin.RuntimeException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -235,15 +219,6 @@ class CameraFragment : Fragment() {
                     // Save the result to disk
                     val output = saveResult(result)
                     Log.d(TAG, "Image saved: ${output.absolutePath}")
-
-                    // If the result is a JPEG file, update EXIF metadata with orientation info
-                    if (output.extension == "jpg") {
-                        val exif = ExifInterface(output.absolutePath)
-                        exif.setAttribute(
-                                ExifInterface.TAG_ORIENTATION, result.orientation.toString())
-                        exif.saveAttributes()
-                        Log.d(TAG, "EXIF metadata saved: ${output.absolutePath}")
-                    }
 
                     // Display the photo taken to user
                     lifecycleScope.launch(Dispatchers.Main) {
@@ -419,7 +394,7 @@ class CameraFragment : Fragment() {
                 val buffer = result.image.planes[0].buffer
                 val bytes = ByteArray(buffer.remaining()).apply { buffer.get(this) }
                 try {
-                    val output = createFile(requireContext(), "jpg")
+                    val output = createFile("jpg")
                     FileOutputStream(output).use { it.write(bytes) }
                     cont.resume(output)
                 } catch (exc: IOException) {
@@ -432,7 +407,7 @@ class CameraFragment : Fragment() {
             ImageFormat.RAW_SENSOR -> {
                 val dngCreator = DngCreator(characteristics, result.metadata)
                 try {
-                    val output = createFile(requireContext(), "dng")
+                    val output = createFile("dng")
                     FileOutputStream(output).use { dngCreator.writeImage(it, result.image) }
                     cont.resume(output)
                 } catch (exc: IOException) {
@@ -494,9 +469,15 @@ class CameraFragment : Fragment() {
          *
          * @return [File] created.
          */
-        private fun createFile(context: Context, extension: String): File {
+        private fun createFile(extension: String): File {
             val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
-            return File(context.filesDir, "IMG_${sdf.format(Date())}.$extension")
+            val g3CameraDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+                "G3Camera")
+            if (!g3CameraDir.exists()) {
+                g3CameraDir.mkdir()
+            }
+
+            return File(g3CameraDir, "IMG_${sdf.format(Date())}.$extension")
         }
     }
 }
