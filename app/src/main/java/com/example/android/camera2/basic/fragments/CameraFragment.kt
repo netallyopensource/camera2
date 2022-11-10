@@ -219,15 +219,9 @@ class CameraFragment : Fragment() {
                     Log.d(TAG, "Image saved: $contentUri")
 
                     // Display the photo taken to user
-                    val viewIntent = Intent().apply {
-                        action = Intent.ACTION_VIEW
-                        setDataAndType(contentUri, "image/jpeg")
-                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    }
-                    try {
-                        startActivity(viewIntent)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Exception launching gallery")
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        navController.navigate(CameraFragmentDirections
+                            .actionCameraFragmentToPhotoFragment(contentUri.toString()))
                     }
                 }
 
