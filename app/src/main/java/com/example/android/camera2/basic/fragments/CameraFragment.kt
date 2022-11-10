@@ -17,19 +17,20 @@
 package com.example.android.camera2.basic.fragments
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.DialogInterface
+import android.content.*
 import android.graphics.Color
 import android.graphics.ImageFormat
 import android.hardware.camera2.*
 import android.media.Image
 import android.media.ImageReader
+import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.*
+import android.provider.MediaStore
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.drawable.toDrawable
-import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -45,10 +46,7 @@ import com.example.android.camera2.basic.databinding.FragmentCameraBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.io.Closeable
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
@@ -217,16 +215,19 @@ class CameraFragment : Fragment() {
                     Log.d(TAG, "Result received: $result")
 
                     // Save the result to disk
-                    val output = saveResult(result)
-                    Log.d(TAG, "Image saved: ${output.absolutePath}")
+                    val contentUri = saveResult(result)
+                    Log.d(TAG, "Image saved: $contentUri")
 
                     // Display the photo taken to user
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        navController.navigate(CameraFragmentDirections
-                                .actionCameraToJpegViewer(output.absolutePath)
-                                .setOrientation(result.orientation)
-                                .setDepth(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                                        result.format == ImageFormat.DEPTH_JPEG))
+                    val viewIntent = Intent().apply {
+                        action = Intent.ACTION_VIEW
+                        setDataAndType(contentUri, "image/jpeg")
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    }
+                    try {
+                        startActivity(viewIntent)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Exception launching gallery")
                     }
                 }
 
@@ -385,43 +386,62 @@ class CameraFragment : Fragment() {
         }, cameraHandler)
     }
 
-    /** Helper function used to save a [CombinedCaptureResult] into a [File] */
-    private suspend fun saveResult(result: CombinedCaptureResult): File = suspendCoroutine { cont ->
+    private suspend fun saveResult(result:CombinedCaptureResult): Uri {
         when (result.format) {
-
             // When the format is JPEG or DEPTH JPEG we can simply save the bytes as-is
             ImageFormat.JPEG, ImageFormat.DEPTH_JPEG -> {
                 val buffer = result.image.planes[0].buffer
                 val bytes = ByteArray(buffer.remaining()).apply { buffer.get(this) }
-                try {
-                    val output = createFile("jpg")
-                    FileOutputStream(output).use { it.write(bytes) }
-                    cont.resume(output)
-                } catch (exc: IOException) {
-                    Log.e(TAG, "Unable to write JPEG image to file", exc)
-                    cont.resumeWithException(exc)
+                val resolver = requireContext().contentResolver
+                val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
+                val name = "IMG_${sdf.format(Date())}.jpg"
+                val contentUri = createContent(resolver, name)
+                if (contentUri == Uri.EMPTY) {
+                    val exc = RuntimeException("Failed to create content URI")
+                    Log.e(TAG, exc.message, exc)
+                    throw(exc)
                 }
-            }
 
-            // When the format is RAW we use the DngCreator utility library
-            ImageFormat.RAW_SENSOR -> {
-                val dngCreator = DngCreator(characteristics, result.metadata)
-                try {
-                    val output = createFile("dng")
-                    FileOutputStream(output).use { dngCreator.writeImage(it, result.image) }
-                    cont.resume(output)
-                } catch (exc: IOException) {
-                    Log.e(TAG, "Unable to write DNG image to file", exc)
-                    cont.resumeWithException(exc)
+                val outStream = resolver.openOutputStream(contentUri)
+
+                outStream?.let {
+                    writeResult(outStream, bytes)
+
+                    outStream.flush()
+                    outStream.close()
                 }
+
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        put(MediaStore.MediaColumns.IS_PENDING, 0)
+                    }
+                }
+
+                val rowsUpdated = resolver.update(contentUri, contentValues, null, null)
+                Log.d(TAG, "$rowsUpdated rows updated")
+
+                return contentUri
             }
 
             // No other formats are supported by this sample
             else -> {
                 val exc = RuntimeException("Unknown image format: ${result.image.format}")
                 Log.e(TAG, exc.message, exc)
-                cont.resumeWithException(exc)
+                throw(exc)
             }
+        }
+}
+
+    /** Helper function used to save a [CombinedCaptureResult] into the Media content provider */
+    private suspend fun writeResult(outStream: OutputStream, bytes: ByteArray): OutputStream = suspendCoroutine { cont ->
+        try {
+            outStream.use { it.write(bytes) }
+            cont.resume(outStream)
+        } catch (exc: IOException) {
+            Log.e(TAG, "Unable to write JPEG image to file", exc)
+            cont.resumeWithException(exc)
         }
     }
 
@@ -465,19 +485,21 @@ class CameraFragment : Fragment() {
         }
 
         /**
-         * Create a [File] named a using formatted timestamp with the current date and time.
+         * Insert a JPEG image into the MediaStore and generate a [Uri].
          *
-         * @return [File] created.
+         * @return [Uri] of the inserted JPEG image.
          */
-        private fun createFile(extension: String): File {
-            val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
-            val g3CameraDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-                "G3Camera")
-            if (!g3CameraDir.exists()) {
-                g3CameraDir.mkdir()
+        private fun createContent(resolver: ContentResolver, name: String): Uri {
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    put(MediaStore.MediaColumns.IS_PENDING, 1)
+                }
             }
 
-            return File(g3CameraDir, "IMG_${sdf.format(Date())}.$extension")
+            val contentUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            return contentUri ?: Uri.EMPTY
         }
     }
 }
