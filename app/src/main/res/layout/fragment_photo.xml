@@ -5,9 +5,24 @@
     android:layout_height="match_parent"
     tools:context=".PhotoFragment">
 
-    <TextView
-        android:id="@+id/photo_filename"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <android.widget.ImageButton
+        android:id="@+id/share_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:src="@android:drawable/ic_menu_share" />
+
+    <android.widget.ImageButton
+        android:id="@+id/delete_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:src="@android:drawable/ic_menu_delete" />
+
+    <ImageView
+        android:id="@+id/photo_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"/>
 
 </FrameLayout>
