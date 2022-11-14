@@ -1,4 +1,4 @@
-package com.example.android.camera.utils
+package com.netally.g3.camera.utils
 
 import android.graphics.ImageFormat
 import android.media.Image

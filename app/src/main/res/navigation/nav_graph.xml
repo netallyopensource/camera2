@@ -23,7 +23,7 @@
 
     <fragment
         android:id="@+id/permissions_fragment"
-        android:name="com.example.android.camera2.basic.fragments.PermissionsFragment"
+        android:name="com.netally.g3.camera.fragments.PermissionsFragment"
         android:label="Permissions" >
 
         <action
@@ -36,7 +36,7 @@
 
     <fragment
         android:id="@+id/camera_fragment"
-        android:name="com.example.android.camera2.basic.fragments.CameraFragment"
+        android:name="com.netally.g3.camera.fragments.CameraFragment"
         android:label="Camera" >
 
         <argument
@@ -61,7 +61,7 @@
     </fragment>
     <fragment
         android:id="@+id/photoFragment"
-        android:name="com.example.android.camera2.basic.PhotoFragment"
+        android:name="com.netally.g3.camera.PhotoFragment"
         android:label="fragment_photo"
         tools:layout="@layout/fragment_photo">
 

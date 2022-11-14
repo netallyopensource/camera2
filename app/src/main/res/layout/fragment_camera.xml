@@ -19,7 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.example.android.camera.utils.AutoFitSurfaceView
+    <com.netally.g3.camera.utils.AutoFitSurfaceView
         android:id="@+id/view_finder"
         android:layout_width="720px"
         android:layout_height="407px"

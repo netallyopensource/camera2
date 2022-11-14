@@ -1,4 +1,4 @@
-package com.example.android.camera2.basic
+package com.netally.g3.camera
 
 import android.content.Intent
 import android.net.Uri
@@ -9,11 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
+import com.netally.g3.camera.R
 
 /**
  * A simple image viewer fragment with delete and share buttons

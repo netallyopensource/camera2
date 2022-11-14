@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.camera2.basic.fragments
+package com.netally.g3.camera.fragments
 
 import android.annotation.SuppressLint
 import android.content.*
@@ -23,7 +23,6 @@ import android.graphics.ImageFormat
 import android.hardware.camera2.*
 import android.media.Image
 import android.media.ImageReader
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
@@ -37,12 +36,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
-import com.example.android.camera.utils.OrientationLiveData
-import com.example.android.camera.utils.computeExifOrientation
-import com.example.android.camera.utils.getPreviewOutputSize
-import com.example.android.camera2.basic.CameraActivity
-import com.example.android.camera2.basic.R
-import com.example.android.camera2.basic.databinding.FragmentCameraBinding
+import com.netally.g3.camera.utils.OrientationLiveData
+import com.netally.g3.camera.utils.computeExifOrientation
+import com.netally.g3.camera.utils.getPreviewOutputSize
+import com.netally.g3.camera.CameraActivity
+import com.netally.g3.camera.R
+import com.netally.g3.camera.databinding.FragmentCameraBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -188,7 +187,8 @@ class CameraFragment : Fragment() {
                 CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
                 .getOutputSizes(args.pixelFormat).maxByOrNull { it.height * it.width }!!
         imageReader = ImageReader.newInstance(
-                size.width, size.height, args.pixelFormat, IMAGE_BUFFER_SIZE)
+                size.width, size.height, args.pixelFormat, IMAGE_BUFFER_SIZE
+        )
 
         // Creates list of Surfaces where the camera will output frames
         val targets = listOf(fragmentCameraBinding.viewFinder.holder.surface, imageReader.surface)
@@ -220,8 +220,11 @@ class CameraFragment : Fragment() {
 
                     // Display the photo taken to user
                     lifecycleScope.launch(Dispatchers.Main) {
-                        navController.navigate(CameraFragmentDirections
-                            .actionCameraFragmentToPhotoFragment(contentUri.toString()))
+                        navController.navigate(
+                            CameraFragmentDirections.actionCameraFragmentToPhotoFragment(
+                                contentUri.toString()
+                            )
+                        )
                     }
                 }
 
@@ -370,8 +373,10 @@ class CameraFragment : Fragment() {
                         val exifOrientation = computeExifOrientation(rotation, mirrored)
 
                         // Build the result and resume progress
-                        cont.resume(CombinedCaptureResult(
-                                image, result, exifOrientation, imageReader.imageFormat))
+                        cont.resume(
+                            CombinedCaptureResult(
+                                image, result, exifOrientation, imageReader.imageFormat)
+                        )
 
                         // There is no need to break out of the loop, this coroutine will suspend
                     }
@@ -380,7 +385,7 @@ class CameraFragment : Fragment() {
         }, cameraHandler)
     }
 
-    private suspend fun saveResult(result:CombinedCaptureResult): Uri {
+    private suspend fun saveResult(result: CombinedCaptureResult): Uri {
         when (result.format) {
             // When the format is JPEG or DEPTH JPEG we can simply save the bytes as-is
             ImageFormat.JPEG, ImageFormat.DEPTH_JPEG -> {

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.example.android.camera2.basic
+package com.netally.g3.camera
 
 import android.Manifest
 import android.content.Context
-import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.ActivityTestRule
