@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 <resources>
-    <string name="app_name">G3Camera</string>
+    <string name="app_name">USB Camera</string>
     <string name="capture">Capture</string>
     <string name="no_camera_title">No camera</string>
     <string name="no_camera_message">No compatible camera found. Please connect a compatible USB camera and restart the app.</string>
