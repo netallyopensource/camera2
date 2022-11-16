@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.netally.g3.camera.fragments
+package com.netallyopensource.g3.camera.fragments
 
 import android.annotation.SuppressLint
 import android.content.*
@@ -36,12 +36,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
-import com.netally.g3.camera.utils.OrientationLiveData
-import com.netally.g3.camera.utils.computeExifOrientation
-import com.netally.g3.camera.utils.getPreviewOutputSize
-import com.netally.g3.camera.CameraActivity
-import com.netally.g3.camera.R
-import com.netally.g3.camera.databinding.FragmentCameraBinding
+import com.netallyopensource.g3.camera.utils.OrientationLiveData
+import com.netallyopensource.g3.camera.utils.computeExifOrientation
+import com.netallyopensource.g3.camera.utils.getPreviewOutputSize
+import com.netallyopensource.g3.camera.CameraActivity
+import com.netallyopensource.g3.camera.R
+import com.netallyopensource.g3.camera.databinding.FragmentCameraBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.netally.g3.camera.utils
+package com.netallyopensource.g3.camera.utils
 
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics

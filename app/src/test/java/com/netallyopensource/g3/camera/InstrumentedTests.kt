@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.netally.g3.camera
+package com.netallyopensource.g3.camera
 
 import android.Manifest
 import android.content.Context

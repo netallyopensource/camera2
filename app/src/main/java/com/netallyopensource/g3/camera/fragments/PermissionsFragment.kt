@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.netally.g3.camera.fragments
+package com.netallyopensource.g3.camera.fragments
 
 import android.Manifest
 import android.content.Context
@@ -29,7 +29,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.lifecycle.lifecycleScope
-import com.netally.g3.camera.R
+import com.netallyopensource.g3.camera.R
 
 private const val PERMISSIONS_REQUEST_CODE = 10
 private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)

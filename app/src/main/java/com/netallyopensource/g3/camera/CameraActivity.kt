@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.netally.g3.camera
+package com.netallyopensource.g3.camera
 
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.netally.g3.camera.databinding.ActivityCameraBinding
+import com.netallyopensource.g3.camera.databinding.ActivityCameraBinding
 
 class CameraActivity : AppCompatActivity() {
 

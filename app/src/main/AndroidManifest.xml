@@ -16,7 +16,7 @@
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.netally.g3.camera">
+    package="com.netallyopensource.g3.camera">
 
     <!-- Permission declarations -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -33,7 +33,7 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-            android:name="com.netally.g3.camera.CameraActivity"
+            android:name="com.netallyopensource.g3.camera.CameraActivity"
             android:clearTaskOnLaunch="true"
             android:theme="@style/AppTheme">
 
